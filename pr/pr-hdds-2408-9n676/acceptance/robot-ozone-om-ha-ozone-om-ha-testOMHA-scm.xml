@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot rpa="false" generated="20191114 14:31:02.867" generator="Robot 3.1.2 (Python 2.7.5 on linux2)">
+<suite source="/opt/hadoop/smoketest/omha/testOMHA.robot" id="s1" name="ozone-om-ha-testOMHA">
+<test id="s1-t1" name="Stop Leader OM and Verify Failover">
+<kw name="Create volume and bucket">
+<kw name="Execute" library="commonlib">
+<arguments>
+<arg>ozone sh volume create o3://${OM_SERVICE_ID}/${VOLUME}</arg>
+</arguments>
+<kw name="Run And Return Rc And Output" library="OperatingSystem">
+<doc>Runs the given command in the system and returns the RC and output.</doc>
+<arguments>
+<arg>${command}</arg>
+</arguments>
+<assign>
+<var>${rc}</var>
+<var>${output}</var>
+</assign>
+<msg timestamp="20191114 14:31:03.070" level="INFO">Running command 'ozone sh volume create o3://omservice/volume1 2&gt;&amp;1'.</msg>
+<msg timestamp="20191114 14:31:05.408" level="INFO">${rc} = 255</msg>
+<msg timestamp="20191114 14:31:05.408" level="INFO">${output} = Couldn't create RpcClient protocol</msg>
+<status status="PASS" endtime="20191114 14:31:05.408" starttime="20191114 14:31:03.067"></status>
+</kw>
+<kw name="Log" library="BuiltIn">
+<doc>Logs the given message with the given level.</doc>
+<arguments>
+<arg>${output}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:05.409" level="INFO">Couldn't create RpcClient protocol</msg>
+<status status="PASS" endtime="20191114 14:31:05.409" starttime="20191114 14:31:05.409"></status>
+</kw>
+<kw name="Should Be Equal As Integers" library="BuiltIn">
+<doc>Fails if objects are unequal after converting them to integers.</doc>
+<arguments>
+<arg>${rc}</arg>
+<arg>0</arg>
+</arguments>
+<msg timestamp="20191114 14:31:05.410" level="INFO">Argument types are:
+&lt;type 'int'&gt;
+&lt;type 'unicode'&gt;</msg>
+<msg timestamp="20191114 14:31:05.410" level="FAIL">255 != 0</msg>
+<status status="FAIL" endtime="20191114 14:31:05.413" starttime="20191114 14:31:05.410"></status>
+</kw>
+<status status="FAIL" endtime="20191114 14:31:05.413" starttime="20191114 14:31:03.066"></status>
+</kw>
+<status status="FAIL" endtime="20191114 14:31:05.413" starttime="20191114 14:31:03.064"></status>
+</kw>
+<status status="FAIL" endtime="20191114 14:31:05.414" critical="yes" starttime="20191114 14:31:03.062">255 != 0</status>
+</test>
+<test id="s1-t2" name="Restart OM and Verify Ratis Logs">
+<kw name="Set Test Variable" library="BuiltIn">
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<arguments>
+<arg>${OM_HOST}</arg>
+<arg>om2</arg>
+</arguments>
+<msg timestamp="20191114 14:31:05.416" level="INFO">${OM_HOST} = om2</msg>
+<status status="PASS" endtime="20191114 14:31:05.417" starttime="20191114 14:31:05.415"></status>
+</kw>
+<kw name="Set Test Variable" library="BuiltIn">
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<arguments>
+<arg>${keyBase}</arg>
+<arg>testOMRestart_</arg>
+</arguments>
+<msg timestamp="20191114 14:31:05.418" level="INFO">${keyBase} = testOMRestart_</msg>
+<status status="PASS" endtime="20191114 14:31:05.418" starttime="20191114 14:31:05.417"></status>
+</kw>
+<kw name="Stop OM">
+<arguments>
+<arg>${OM_HOST}</arg>
+</arguments>
+<kw name="Set Global Variable" library="BuiltIn">
+<doc>Makes a variable available globally in all tests and suites.</doc>
+<arguments>
+<arg>${HOST}</arg>
+<arg>${OM_HOST}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:05.419" level="INFO">${HOST} = om2</msg>
+<status status="PASS" endtime="20191114 14:31:05.419" starttime="20191114 14:31:05.418"></status>
+</kw>
+<kw name="Open Connection And Log In">
+<kw name="Open Connection" library="SSHLibrary">
+<doc>Opens a new SSH connection to the given ``host`` and ``port``.</doc>
+<arguments>
+<arg>${HOST}</arg>
+</arguments>
+<status status="PASS" endtime="20191114 14:31:05.420" starttime="20191114 14:31:05.419"></status>
+</kw>
+<kw name="Login With Public Key" library="SSHLibrary">
+<doc>Logs into the SSH server using key-based authentication.</doc>
+<arguments>
+<arg>${USERNAME}</arg>
+<arg>${PUBLIC_KEY}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:05.420" level="INFO">Logging into 'om2:22' as 'hadoop'.</msg>
+<msg timestamp="20191114 14:31:06.703" level="INFO">Read output: /bin/bash: Resource temporarily unavailable</msg>
+<status status="PASS" endtime="20191114 14:31:06.704" starttime="20191114 14:31:05.420"></status>
+</kw>
+<status status="PASS" endtime="20191114 14:31:06.704" starttime="20191114 14:31:05.419"></status>
+</kw>
+<kw name="Execute Command" library="SSHLibrary">
+<doc>Executes ``command`` on the remote machine and returns its outputs.</doc>
+<arguments>
+<arg>/opt/stopOM.sh</arg>
+</arguments>
+<msg timestamp="20191114 14:31:06.705" level="INFO">Executing command '/opt/stopOM.sh'.</msg>
+<msg timestamp="20191114 14:31:06.719" level="INFO">Command exited with return code 1.</msg>
+<status status="PASS" endtime="20191114 14:31:06.719" starttime="20191114 14:31:06.705"></status>
+</kw>
+<kw name="Execute Command" library="SSHLibrary">
+<doc>Executes ``command`` on the remote machine and returns its outputs.</doc>
+<arguments>
+<arg>sudo ps aux | grep om</arg>
+</arguments>
+<assign>
+<var>${shutdownMsg}</var>
+</assign>
+<msg timestamp="20191114 14:31:06.720" level="INFO">Executing command 'sudo ps aux | grep om'.</msg>
+<msg timestamp="20191114 14:31:06.763" level="INFO">Command exited with return code 1.</msg>
+<msg timestamp="20191114 14:31:06.764" level="INFO">${shutdownMsg} = </msg>
+<status status="PASS" endtime="20191114 14:31:06.764" starttime="20191114 14:31:06.719"></status>
+</kw>
+<kw name="Close Connection" library="SSHLibrary">
+<doc>Closes the current connection.</doc>
+<status status="PASS" endtime="20191114 14:31:06.878" starttime="20191114 14:31:06.764"></status>
+</kw>
+<kw name="Should Not Contain" library="BuiltIn">
+<doc>Fails if ``container`` contains ``item`` one or more times.</doc>
+<arguments>
+<arg>${shutdownMsg}</arg>
+<arg>OzoneManagerStarter</arg>
+</arguments>
+<status status="PASS" endtime="20191114 14:31:06.879" starttime="20191114 14:31:06.878"></status>
+</kw>
+<status status="PASS" endtime="20191114 14:31:06.879" starttime="20191114 14:31:05.418"></status>
+</kw>
+<kw name="Get Ratis Logs">
+<arguments>
+<arg>${OM_HOST}</arg>
+</arguments>
+<assign>
+<var>${numLogsBefore}</var>
+<var>@{logsBefore}</var>
+</assign>
+<kw name="Set Global Variable" library="BuiltIn">
+<doc>Makes a variable available globally in all tests and suites.</doc>
+<arguments>
+<arg>${HOST}</arg>
+<arg>${OM_HOST}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:06.880" level="INFO">${HOST} = om2</msg>
+<status status="PASS" endtime="20191114 14:31:06.880" starttime="20191114 14:31:06.880"></status>
+</kw>
+<kw name="Open Connection And Log In">
+<kw name="Open Connection" library="SSHLibrary">
+<doc>Opens a new SSH connection to the given ``host`` and ``port``.</doc>
+<arguments>
+<arg>${HOST}</arg>
+</arguments>
+<status status="PASS" endtime="20191114 14:31:06.881" starttime="20191114 14:31:06.881"></status>
+</kw>
+<kw name="Login With Public Key" library="SSHLibrary">
+<doc>Logs into the SSH server using key-based authentication.</doc>
+<arguments>
+<arg>${USERNAME}</arg>
+<arg>${PUBLIC_KEY}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:06.882" level="INFO">Logging into 'om2:22' as 'hadoop'.</msg>
+<msg timestamp="20191114 14:31:08.079" level="INFO">Read output: Last login: Thu Nov 14 14:31:05 2019 from ozone-om-ha_scm_1.ozone-om-ha_default
+/bin/bash: Resource temporarily unavailable</msg>
+<status status="PASS" endtime="20191114 14:31:08.079" starttime="20191114 14:31:06.881"></status>
+</kw>
+<status status="PASS" endtime="20191114 14:31:08.080" starttime="20191114 14:31:06.880"></status>
+</kw>
+<kw name="Execute Command" library="SSHLibrary">
+<doc>Executes ``command`` on the remote machine and returns its outputs.</doc>
+<arguments>
+<arg>ls ${RATIS_DIR} | grep -v 'snapshot'</arg>
+</arguments>
+<assign>
+<var>${gorupId}</var>
+</assign>
+<msg timestamp="20191114 14:31:08.081" level="INFO">Executing command 'ls /data/metadata/ratis | grep -v 'snapshot''.</msg>
+<msg timestamp="20191114 14:31:08.095" level="INFO">Command exited with return code 1.</msg>
+<msg timestamp="20191114 14:31:08.096" level="INFO">${gorupId} = </msg>
+<status status="PASS" endtime="20191114 14:31:08.096" starttime="20191114 14:31:08.080"></status>
+</kw>
+<kw name="Log" library="BuiltIn">
+<doc>Logs the given message with the given level.</doc>
+<arguments>
+<arg>Ratis GroupId: ${gorupId}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:08.097" level="INFO">Ratis GroupId: </msg>
+<status status="PASS" endtime="20191114 14:31:08.097" starttime="20191114 14:31:08.096"></status>
+</kw>
+<kw name="Catenate" library="BuiltIn">
+<doc>Catenates the given items together and returns the resulted string.</doc>
+<arguments>
+<arg>SEPARATOR=</arg>
+<arg>${RATIS_DIR}</arg>
+<arg>/</arg>
+<arg>${gorupId}</arg>
+<arg>/current/</arg>
+</arguments>
+<assign>
+<var>${currDir}</var>
+</assign>
+<msg timestamp="20191114 14:31:08.098" level="INFO">${currDir} = /data/metadata/ratis//current/</msg>
+<status status="PASS" endtime="20191114 14:31:08.099" starttime="20191114 14:31:08.098"></status>
+</kw>
+<kw name="List Files In Directory" library="SSHLibrary">
+<doc>A wrapper for `List Directory` that returns only files.</doc>
+<arguments>
+<arg>${currDir}</arg>
+<arg>log_*</arg>
+</arguments>
+<assign>
+<var>@{logs}</var>
+</assign>
+<msg timestamp="20191114 14:31:08.141" level="FAIL">SSHException: EOF during negotiation</msg>
+<status status="FAIL" endtime="20191114 14:31:08.142" starttime="20191114 14:31:08.099"></status>
+</kw>
+<status status="FAIL" endtime="20191114 14:31:08.142" starttime="20191114 14:31:06.879"></status>
+</kw>
+<status status="FAIL" endtime="20191114 14:31:08.142" critical="yes" starttime="20191114 14:31:05.414">SSHException: EOF during negotiation</status>
+</test>
+<test id="s1-t3" name="Test Multiple Failovers">
+<kw type="for" name="${INDEX} IN RANGE [ 5 ]">
+<kw type="foritem" name="${INDEX} = 0">
+<kw name="Get OM Leader Node">
+<assign>
+<var>${leaderOM}</var>
+</assign>
+<kw name="Execute" library="commonlib">
+<arguments>
+<arg>ozone admin om getserviceroles --service-id=omservice</arg>
+</arguments>
+<assign>
+<var>${result}</var>
+</assign>
+<kw name="Run And Return Rc And Output" library="OperatingSystem">
+<doc>Runs the given command in the system and returns the RC and output.</doc>
+<arguments>
+<arg>${command}</arg>
+</arguments>
+<assign>
+<var>${rc}</var>
+<var>${output}</var>
+</assign>
+<msg timestamp="20191114 14:31:08.146" level="INFO">Running command 'ozone admin om getserviceroles --service-id=omservice 2&gt;&amp;1'.</msg>
+<msg timestamp="20191114 14:31:10.172" level="INFO">${rc} = 0</msg>
+<msg timestamp="20191114 14:31:10.172" level="INFO">${output} = om2 : FOLLOWER
+om3 : FOLLOWER
+om1 : LEADER</msg>
+<status status="PASS" endtime="20191114 14:31:10.172" starttime="20191114 14:31:08.144"></status>
+</kw>
+<kw name="Log" library="BuiltIn">
+<doc>Logs the given message with the given level.</doc>
+<arguments>
+<arg>${output}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:10.174" level="INFO">om2 : FOLLOWER
+om3 : FOLLOWER
+om1 : LEADER</msg>
+<status status="PASS" endtime="20191114 14:31:10.174" starttime="20191114 14:31:10.173"></status>
+</kw>
+<kw name="Should Be Equal As Integers" library="BuiltIn">
+<doc>Fails if objects are unequal after converting them to integers.</doc>
+<arguments>
+<arg>${rc}</arg>
+<arg>0</arg>
+</arguments>
+<msg timestamp="20191114 14:31:10.175" level="INFO">Argument types are:
+&lt;type 'int'&gt;
+&lt;type 'unicode'&gt;</msg>
+<status status="PASS" endtime="20191114 14:31:10.175" starttime="20191114 14:31:10.175"></status>
+</kw>
+<msg timestamp="20191114 14:31:10.176" level="INFO">${result} = om2 : FOLLOWER
+om3 : FOLLOWER
+om1 : LEADER</msg>
+<status status="PASS" endtime="20191114 14:31:10.176" starttime="20191114 14:31:08.144"></status>
+</kw>
+<kw name="Log" library="BuiltIn">
+<doc>Logs the given message with the given level.</doc>
+<arguments>
+<arg>${result}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:10.177" level="INFO">om2 : FOLLOWER
+om3 : FOLLOWER
+om1 : LEADER</msg>
+<status status="PASS" endtime="20191114 14:31:10.177" starttime="20191114 14:31:10.176"></status>
+</kw>
+<kw name="Should Contain" library="BuiltIn">
+<doc>Fails if ``container`` does not contain ``item`` one or more times.</doc>
+<arguments>
+<arg>${result}</arg>
+<arg>LEADER</arg>
+<arg>1</arg>
+</arguments>
+<status status="PASS" endtime="20191114 14:31:10.178" starttime="20191114 14:31:10.177"></status>
+</kw>
+<kw name="Should Contain" library="BuiltIn">
+<doc>Fails if ``container`` does not contain ``item`` one or more times.</doc>
+<arguments>
+<arg>${result}</arg>
+<arg>FOLLOWER</arg>
+<arg>2</arg>
+</arguments>
+<status status="PASS" endtime="20191114 14:31:10.179" starttime="20191114 14:31:10.178"></status>
+</kw>
+<kw name="Get Lines Containing String" library="String">
+<doc>Returns lines of the given ``string`` that contain the ``pattern``.</doc>
+<arguments>
+<arg>${result}</arg>
+<arg>LEADER</arg>
+</arguments>
+<assign>
+<var>${omLine}</var>
+</assign>
+<msg timestamp="20191114 14:31:10.180" level="INFO">1 out of 3 lines matched</msg>
+<msg timestamp="20191114 14:31:10.180" level="INFO">${omLine} = om1 : LEADER</msg>
+<status status="PASS" endtime="20191114 14:31:10.180" starttime="20191114 14:31:10.179"></status>
+</kw>
+<kw name="Split String" library="String">
+<doc>Splits the ``string`` using ``separator`` as a delimiter string.</doc>
+<arguments>
+<arg>${omLine}</arg>
+<arg>:</arg>
+</arguments>
+<assign>
+<var>${split1}</var>
+<var>${split2}</var>
+</assign>
+<msg timestamp="20191114 14:31:10.182" level="INFO">${split1} = om1 </msg>
+<msg timestamp="20191114 14:31:10.182" level="INFO">${split2} =  LEADER</msg>
+<status status="PASS" endtime="20191114 14:31:10.182" starttime="20191114 14:31:10.181"></status>
+</kw>
+<kw name="Strip String" library="String">
+<doc>Remove leading and/or trailing whitespaces from the given string.</doc>
+<arguments>
+<arg>${split1}</arg>
+</arguments>
+<assign>
+<var>${leaderOM}</var>
+</assign>
+<msg timestamp="20191114 14:31:10.183" level="INFO">${leaderOM} = om1</msg>
+<status status="PASS" endtime="20191114 14:31:10.183" starttime="20191114 14:31:10.182"></status>
+</kw>
+<kw name="Log" library="BuiltIn">
+<doc>Logs the given message with the given level.</doc>
+<arguments>
+<arg>Leader OM: ${leaderOM}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:10.184" level="INFO">Leader OM: om1</msg>
+<status status="PASS" endtime="20191114 14:31:10.184" starttime="20191114 14:31:10.183"></status>
+</kw>
+<msg timestamp="20191114 14:31:10.185" level="INFO">${leaderOM} = om1</msg>
+<status status="PASS" endtime="20191114 14:31:10.185" starttime="20191114 14:31:08.143"></status>
+</kw>
+<kw name="Stop OM">
+<arguments>
+<arg>${leaderOM}</arg>
+</arguments>
+<assign>
+<var>${stopOMResult}</var>
+</assign>
+<kw name="Set Global Variable" library="BuiltIn">
+<doc>Makes a variable available globally in all tests and suites.</doc>
+<arguments>
+<arg>${HOST}</arg>
+<arg>${OM_HOST}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:10.187" level="INFO">${HOST} = om1</msg>
+<status status="PASS" endtime="20191114 14:31:10.187" starttime="20191114 14:31:10.186"></status>
+</kw>
+<kw name="Open Connection And Log In">
+<kw name="Open Connection" library="SSHLibrary">
+<doc>Opens a new SSH connection to the given ``host`` and ``port``.</doc>
+<arguments>
+<arg>${HOST}</arg>
+</arguments>
+<status status="PASS" endtime="20191114 14:31:10.189" starttime="20191114 14:31:10.188"></status>
+</kw>
+<kw name="Login With Public Key" library="SSHLibrary">
+<doc>Logs into the SSH server using key-based authentication.</doc>
+<arguments>
+<arg>${USERNAME}</arg>
+<arg>${PUBLIC_KEY}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:10.190" level="INFO">Logging into 'om1:22' as 'hadoop'.</msg>
+<msg timestamp="20191114 14:31:11.391" level="INFO">Read output: /bin/bash: Resource temporarily unavailable</msg>
+<status status="PASS" endtime="20191114 14:31:11.391" starttime="20191114 14:31:10.190"></status>
+</kw>
+<status status="PASS" endtime="20191114 14:31:11.392" starttime="20191114 14:31:10.188"></status>
+</kw>
+<kw name="Execute Command" library="SSHLibrary">
+<doc>Executes ``command`` on the remote machine and returns its outputs.</doc>
+<arguments>
+<arg>/opt/stopOM.sh</arg>
+</arguments>
+<msg timestamp="20191114 14:31:11.392" level="INFO">Executing command '/opt/stopOM.sh'.</msg>
+<msg timestamp="20191114 14:31:11.407" level="INFO">Command exited with return code 1.</msg>
+<status status="PASS" endtime="20191114 14:31:11.407" starttime="20191114 14:31:11.392"></status>
+</kw>
+<kw name="Execute Command" library="SSHLibrary">
+<doc>Executes ``command`` on the remote machine and returns its outputs.</doc>
+<arguments>
+<arg>sudo ps aux | grep om</arg>
+</arguments>
+<assign>
+<var>${shutdownMsg}</var>
+</assign>
+<msg timestamp="20191114 14:31:11.408" level="INFO">Executing command 'sudo ps aux | grep om'.</msg>
+<msg timestamp="20191114 14:31:11.485" level="INFO">Command exited with return code 1.</msg>
+<msg timestamp="20191114 14:31:11.485" level="INFO">${shutdownMsg} = </msg>
+<status status="PASS" endtime="20191114 14:31:11.485" starttime="20191114 14:31:11.407"></status>
+</kw>
+<kw name="Close Connection" library="SSHLibrary">
+<doc>Closes the current connection.</doc>
+<status status="PASS" endtime="20191114 14:31:11.600" starttime="20191114 14:31:11.486"></status>
+</kw>
+<kw name="Should Not Contain" library="BuiltIn">
+<doc>Fails if ``container`` contains ``item`` one or more times.</doc>
+<arguments>
+<arg>${shutdownMsg}</arg>
+<arg>OzoneManagerStarter</arg>
+</arguments>
+<status status="PASS" endtime="20191114 14:31:11.601" starttime="20191114 14:31:11.600"></status>
+</kw>
+<msg timestamp="20191114 14:31:11.601" level="INFO">${stopOMResult} = None</msg>
+<status status="PASS" endtime="20191114 14:31:11.601" starttime="20191114 14:31:10.185"></status>
+</kw>
+<kw name="Get OM Leader Node">
+<assign>
+<var>${newLeaderOM}</var>
+</assign>
+<kw name="Execute" library="commonlib">
+<arguments>
+<arg>ozone admin om getserviceroles --service-id=omservice</arg>
+</arguments>
+<assign>
+<var>${result}</var>
+</assign>
+<kw name="Run And Return Rc And Output" library="OperatingSystem">
+<doc>Runs the given command in the system and returns the RC and output.</doc>
+<arguments>
+<arg>${command}</arg>
+</arguments>
+<assign>
+<var>${rc}</var>
+<var>${output}</var>
+</assign>
+<msg timestamp="20191114 14:31:11.606" level="INFO">Running command 'ozone admin om getserviceroles --service-id=omservice 2&gt;&amp;1'.</msg>
+<msg timestamp="20191114 14:31:13.458" level="INFO">${rc} = 0</msg>
+<msg timestamp="20191114 14:31:13.458" level="INFO">${output} = om2 : FOLLOWER
+om3 : FOLLOWER
+om1 : LEADER</msg>
+<status status="PASS" endtime="20191114 14:31:13.458" starttime="20191114 14:31:11.603"></status>
+</kw>
+<kw name="Log" library="BuiltIn">
+<doc>Logs the given message with the given level.</doc>
+<arguments>
+<arg>${output}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:13.459" level="INFO">om2 : FOLLOWER
+om3 : FOLLOWER
+om1 : LEADER</msg>
+<status status="PASS" endtime="20191114 14:31:13.459" starttime="20191114 14:31:13.459"></status>
+</kw>
+<kw name="Should Be Equal As Integers" library="BuiltIn">
+<doc>Fails if objects are unequal after converting them to integers.</doc>
+<arguments>
+<arg>${rc}</arg>
+<arg>0</arg>
+</arguments>
+<msg timestamp="20191114 14:31:13.460" level="INFO">Argument types are:
+&lt;type 'int'&gt;
+&lt;type 'unicode'&gt;</msg>
+<status status="PASS" endtime="20191114 14:31:13.460" starttime="20191114 14:31:13.460"></status>
+</kw>
+<msg timestamp="20191114 14:31:13.460" level="INFO">${result} = om2 : FOLLOWER
+om3 : FOLLOWER
+om1 : LEADER</msg>
+<status status="PASS" endtime="20191114 14:31:13.460" starttime="20191114 14:31:11.602"></status>
+</kw>
+<kw name="Log" library="BuiltIn">
+<doc>Logs the given message with the given level.</doc>
+<arguments>
+<arg>${result}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:13.461" level="INFO">om2 : FOLLOWER
+om3 : FOLLOWER
+om1 : LEADER</msg>
+<status status="PASS" endtime="20191114 14:31:13.461" starttime="20191114 14:31:13.461"></status>
+</kw>
+<kw name="Should Contain" library="BuiltIn">
+<doc>Fails if ``container`` does not contain ``item`` one or more times.</doc>
+<arguments>
+<arg>${result}</arg>
+<arg>LEADER</arg>
+<arg>1</arg>
+</arguments>
+<status status="PASS" endtime="20191114 14:31:13.461" starttime="20191114 14:31:13.461"></status>
+</kw>
+<kw name="Should Contain" library="BuiltIn">
+<doc>Fails if ``container`` does not contain ``item`` one or more times.</doc>
+<arguments>
+<arg>${result}</arg>
+<arg>FOLLOWER</arg>
+<arg>2</arg>
+</arguments>
+<status status="PASS" endtime="20191114 14:31:13.462" starttime="20191114 14:31:13.462"></status>
+</kw>
+<kw name="Get Lines Containing String" library="String">
+<doc>Returns lines of the given ``string`` that contain the ``pattern``.</doc>
+<arguments>
+<arg>${result}</arg>
+<arg>LEADER</arg>
+</arguments>
+<assign>
+<var>${omLine}</var>
+</assign>
+<msg timestamp="20191114 14:31:13.462" level="INFO">1 out of 3 lines matched</msg>
+<msg timestamp="20191114 14:31:13.463" level="INFO">${omLine} = om1 : LEADER</msg>
+<status status="PASS" endtime="20191114 14:31:13.463" starttime="20191114 14:31:13.462"></status>
+</kw>
+<kw name="Split String" library="String">
+<doc>Splits the ``string`` using ``separator`` as a delimiter string.</doc>
+<arguments>
+<arg>${omLine}</arg>
+<arg>:</arg>
+</arguments>
+<assign>
+<var>${split1}</var>
+<var>${split2}</var>
+</assign>
+<msg timestamp="20191114 14:31:13.463" level="INFO">${split1} = om1 </msg>
+<msg timestamp="20191114 14:31:13.463" level="INFO">${split2} =  LEADER</msg>
+<status status="PASS" endtime="20191114 14:31:13.463" starttime="20191114 14:31:13.463"></status>
+</kw>
+<kw name="Strip String" library="String">
+<doc>Remove leading and/or trailing whitespaces from the given string.</doc>
+<arguments>
+<arg>${split1}</arg>
+</arguments>
+<assign>
+<var>${leaderOM}</var>
+</assign>
+<msg timestamp="20191114 14:31:13.464" level="INFO">${leaderOM} = om1</msg>
+<status status="PASS" endtime="20191114 14:31:13.464" starttime="20191114 14:31:13.463"></status>
+</kw>
+<kw name="Log" library="BuiltIn">
+<doc>Logs the given message with the given level.</doc>
+<arguments>
+<arg>Leader OM: ${leaderOM}</arg>
+</arguments>
+<msg timestamp="20191114 14:31:13.464" level="INFO">Leader OM: om1</msg>
+<status status="PASS" endtime="20191114 14:31:13.464" starttime="20191114 14:31:13.464"></status>
+</kw>
+<msg timestamp="20191114 14:31:13.465" level="INFO">${newLeaderOM} = om1</msg>
+<status status="PASS" endtime="20191114 14:31:13.465" starttime="20191114 14:31:11.602"></status>
+</kw>
+<kw name="Should Not Be Equal" library="BuiltIn">
+<doc>Fails if the given objects are equal.</doc>
+<arguments>
+<arg>${leaderOM}</arg>
+<arg>${newLeaderOM}</arg>
+<arg>OMs did not failover</arg>
+</arguments>
+<msg timestamp="20191114 14:31:13.465" level="FAIL">OMs did not failover: om1 == om1</msg>
+<status status="FAIL" endtime="20191114 14:31:13.465" starttime="20191114 14:31:13.465"></status>
+</kw>
+<status status="FAIL" endtime="20191114 14:31:13.466" starttime="20191114 14:31:08.143"></status>
+</kw>
+<status status="FAIL" endtime="20191114 14:31:13.466" starttime="20191114 14:31:08.143"></status>
+</kw>
+<status status="FAIL" endtime="20191114 14:31:13.466" critical="yes" starttime="20191114 14:31:08.142">OMs did not failover: om1 == om1</status>
+</test>
+<doc>Smoketest ozone cluster startup</doc>
+<status status="FAIL" endtime="20191114 14:31:13.467" starttime="20191114 14:31:02.868"></status>
+</suite>
+<statistics>
+<total>
+<stat fail="3" pass="0">Critical Tests</stat>
+<stat fail="3" pass="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat fail="3" id="s1" name="ozone-om-ha-testOMHA" pass="0">ozone-om-ha-testOMHA</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
